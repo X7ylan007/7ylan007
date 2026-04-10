@@ -1,1 +1,45 @@
-y
+name: Match du jour
+
+on:
+
+schedule:
+- cron: "*/30 * * * *"
+
+workflow_dispatch:
+
+jobs:
+
+run-script:
+
+runs-on: ubuntu-latest
+
+steps:
+
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  # 4️⃣ Synchronisation avec la branche main avant exécution
+  - name: Sync with remote main
+    run: |
+      git config --local user.name "github-actions[bot]"
+      git config --local user.email "github-actions[bot]@users.noreply.github.com"
+      git pull --rebase origin main
+
+  - name: Setup Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: "3.11"
+
+  - name: Install dependencies
+    run: |
+      pip install requests beautifulsoup4
+
+  - name: Run script
+    run: |
+      python scripts/Match-du-jour.py
+
+  - name: Commit and push changes
+    run: |
+      git add .
+      git commit -m "update matchs du jour" || echo "No changes to commit"
+      git push
